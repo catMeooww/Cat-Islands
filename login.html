@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Islands - Login</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-database.js"></script>
+    <script src="main.js"></script>
+</head>
+<body onload="loadUserData()">
+    <div id="top">
+        <h1>Log-In</h1>
+        <button onclick="redirect(0)">←</button>
+    </div>
+    <div id="output">
+        <label>Username:</label>
+        <br><input id="login-username"><br><br>
+        <label>Password:</label>
+        <br><input id="login-userpassword"><br><br>
+        <hr>
+        <button onclick="LogAccount()" style="background-color: cornflowerblue;">Log-In Account</button>
+        <label>or</label>
+        <button onclick="createAccount()" style="background-color: blueviolet;">Create Account</button>
+        <p id="login-error"></p>
+    </div>
+    <script>
+        function userLogged(){
+            text = "<h2>Logged as "+user+"</h2><br>";
+            btn = "<button onclick='logout()' style='background-color:red;'>Log Out</button>";
+            document.getElementById("output").innerHTML = text+btn;
+        }
+
+        function LogAccount() {
+            userinput = document.getElementById("login-username").value;
+            passwordinput = document.getElementById("login-userpassword").value;
+            if (userinput != "" && passwordinput != "") {
+                var userref = firebase.database().ref("catislands/users/" + userinput + "/status");
+                var passref = firebase.database().ref("catislands/users/" + userinput + "/password");
+                var isUserCreated;
+                var isJoining = false;
+                userref.on("value", data => {
+                    isUserCreated = data.val();
+                    if (!isJoining) {
+                        isJoining = true;
+                        if (isUserCreated == "online" || isUserCreated == "mod") {
+                            passref.on("value", data => {
+                                canPass = data.val();
+                                if (canPass == passwordinput) {
+                                    localStorage.setItem("user", userinput);
+                                    localStorage.setItem("password", passwordinput);
+                                    location.reload();
+                                } else {
+                                    document.getElementById("login-error").innerHTML = "Incorrect Password";
+                                    document.getElementById("login-userpassword").style.borderColor = "red";
+                                }
+                            })
+                        } else if (isUserCreated == "disabled") {
+                            document.getElementById("login-error").innerHTML = "This account got disabled";
+                            document.getElementById("login-username").style.borderColor = "red";
+                        } else {
+                            document.getElementById("login-error").innerHTML = "Incorrect Username";
+                            document.getElementById("login-username").style.borderColor = "red";
+                        }
+                    }
+                });
+            } else {
+                document.getElementById("login-error").innerHTML = "All the inputs need a value";
+                document.getElementById("login-username").style.borderColor = "yellow";
+                document.getElementById("login-userpassword").style.borderColor = "yellow";
+            }
+        }
+
+        function createAccount() {
+            userinput = document.getElementById("login-username").value;
+            passwordinput = document.getElementById("login-userpassword").value;
+            if (userinput != "" && passwordinput != "") {
+                var userref = firebase.database().ref("catislands/users/" + userinput + "/status");
+                var isUserCreated;
+                var isJoining = false;
+                userref.on("value", data => {
+                    isUserCreated = data.val();
+                    if (!isJoining) {
+                        isJoining = true;
+                        if (isUserCreated == null) {
+                            firebase.database().ref("catislands/users/").child(userinput).update({
+                                password: passwordinput,
+                                status: "online"
+                            });
+                            document.getElementById("login-error").innerHTML = "Account Sucessfuly Created";
+                        } else {
+                            document.getElementById("login-error").innerHTML = "This username already exists";
+                            document.getElementById("login-username").style.borderColor = "red";
+                        }
+                    }
+                });
+            } else {
+                document.getElementById("login-error").innerHTML = "All the inputs need a value";
+                document.getElementById("login-username").style.borderColor = "yellow";
+                document.getElementById("login-userpassword").style.borderColor = "yellow";
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem("user");
+            localStorage.removeItem("password");
+            location.reload();
+        }
+    </script>
+</body>
+</html>

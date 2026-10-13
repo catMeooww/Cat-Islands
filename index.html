@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Islands</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-database.js"></script>
+    <script src="main.js"></script>
+</head>
+
+<body onload="loadUserData()">
+    <div class="ui" id="newgame">
+        <button onclick="closeUi()" style="background-color: black;float: left;">X</button>
+        <br><br><hr>
+        <h3>New Game</h3>
+        <label>Game Name:</label>
+        <br><input id="gamename"><br><br>
+        <button onclick="createGame()" style="background-color: green;">Create Game</button>
+    </div>
+    <div id="top">
+        <h1>Cat Islands</h1>
+        <button onclick="redirect(2)">Account</button>
+        <button onclick="redirect(3)">More</button>
+    </div>
+    <div id="saves"></div>
+    <script>
+        function userLogged() {
+            firebase.database().ref("/catislands/users/" + user + "/saves/").on('value', function (snapshot) {
+                document.getElementById("saves").innerHTML = "";
+                snapshot.forEach(function (childSnapshot) {
+                    saveID = childSnapshot.key; saveData = childSnapshot.val();
+                    saveName = saveData['name'];
+                    div = "<h3>→ "+saveName+"<h3><label>"+saveID+"<label>";
+                    func = "openGame('"+saveID+"')";
+                    document.getElementById("saves").innerHTML += '<div class="savediv" onclick="'+func+'">'+div+'</div>';
+                });
+                document.getElementById("saves").innerHTML += "<div class='savediv' onclick='newGame()'><h3>+ New Game</h3></div>";
+            })
+        }
+        function userFallback() {
+            text = "<h2>Not Logged</h2><hr>";
+            btn = "<button onclick='redirect(2)' style='background-color:cornflowerblue'>Log-In</button>";
+            document.getElementById("saves").innerHTML = text + btn;
+        }
+        function newGame(){
+            document.getElementById("newgame").style.visibility = "visible";
+        }
+        function closeUi(){
+            document.getElementById("newgame").style.visibility = "hidden";
+        }
+    </script>
+</body>
+
+</html>

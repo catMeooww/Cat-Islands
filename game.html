@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Islands</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-database.js"></script>
+    <script src="p5.min.js"></script>
+    <script src="p5.dom.min.js"></script>
+    <script src="p5.play.js"></script>
+    <script src="main.js"></script>
+    <script src="game.js"></script>
+</head>
+
+<body onload="loadGameData()">
+    <div id="islandUI" class="ui">
+        <button onclick="closeUi()" style="background-color: black;float: left;">X</button>
+        <label id="islandName"></label>
+        <hr>
+        <div id="islandData"></div>
+    </div>
+    <div id="buildUI" class="ui">
+        <button onclick="closeUi()" style="background-color: black;float: left;">X</button>
+        <label>ATTACH ISLAND</label>
+        <hr>
+        <div id="builds">
+            <button onclick="setBuild(1)"><img src="assets/IslandIcon.png"></button>
+        </div>
+    </div>
+    <div id="pause" class="ui">
+        <button onclick="closeUi()">Continue</button>
+        <button onclick="location = './'">Leave</button>
+    </div>
+
+    <div id="nav" class="menu">
+        <button class="title">Cat Islands</button>
+        <button onclick="pauseGame()">Pause</button>
+        <button onclick="centerCamera()">Center</button>
+        <button onclick="toUser()" class="user"></button>
+        <p id="selectionName"></p>
+    </div>
+    <div id="canvas-holder"></div>
+    <div id="bar" class="menu">
+        <button onclick="setMode(0)"><img src="assets/MoveIcon.png"></button>
+        <button onclick="setMode(1)"><img src="assets/IslandIcon.png"></button>
+        <button onclick="setMode(2)"><img src="assets/EditIcon.png"></button>
+    </div>
+
+    <script>
+        function userLogged(){
+            for(i=0;i<document.getElementsByClassName('user').length;i++){
+                document.getElementsByClassName('user').item(i).innerHTML = user;
+            }
+        }
+        function userFallback(){
+            window.location = "./";
+        }
+    </script>
+</body>
+
+</html>
