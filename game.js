@@ -18,9 +18,20 @@ gameHeight = window.innerHeight;
 
 async function loadGameData() {
     loadUserData();
-    await firebase.database().ref("catislands/saves/" + gameID + "/name").once('value', data => {
-        gameData[0] = data.val();
-        document.title = "Cat Islands - " + gameData[0];
+    await firebase.database().ref("catislands/saves/" + gameID + "/data/").on('value', function (snapshot) {
+        snapshot.forEach(function (childSnapshot) {
+            childID = childSnapshot.key; childData = childSnapshot.val();
+            if(childID == "name"){
+                gameData[0]=childData;
+                document.title = "Cat Islands - "+gameData[0];
+            }else if(childID == "residents"){
+                gameData[1]=childData;
+                document.getElementById("residentsStatus").innerHTML = "Cats: "+gameData[1];
+            }else if(childID == "production"){
+                gameData[2]=childData;
+                document.getElementById("productionStatus").innerHTML = "Production: "+gameData[2];
+            }
+        });
     });
     await firebase.database().ref("catislands/saves/" + gameID + "/bridges/").on('value', function (snapshot) {
         gameBridges = [];
@@ -43,6 +54,8 @@ async function loadGameData() {
 function preload() {
     islandBase = loadImage("./assets/Island.png");
     addIcon = loadImage("./assets/addIcon.png");
+    islandHouse = loadImage("./assets/House.png");
+    islandShop = loadImage("./assets/Shop.png");
 }
 
 function setup() {
@@ -84,6 +97,11 @@ function draw() {
             posY = struct['y'];
             size = struct['size'] * 50;
             image(islandBase, posX, posY, size, size);
+            if(struct['type'] == "residencial_island"){
+                image(islandHouse, posX+50, posY+50, size-100, size-100);
+            } else if(struct['type'] == "comercial_island"){
+                image(islandShop, posX+50, posY+50, size-100, size-100);
+            }
             if (gameMode == "build") {
                 image(addIcon, posX + size / 2, posY - 15);
                 image(addIcon, posX - 15, posY + size / 2);
@@ -103,27 +121,56 @@ function mouseClicked() {
             gameMode = "move";
             gameStructures.forEach(struct => {
                 if (struct["id"] == buildAnchor) {
+                    newData = {};
+                    newIsland = {};
+                    newBridge = {};
+                    //island
                     if (buildSelection == "small") {
-                        //island
                         newIsland = {
                             "size": 5,
                             "type": "small_island",
                             "x": clickX,
                             "y": clickY
                         }
-                        //bridge
-                        anchorMiddle = struct['size'] * 25;
-                        buildMiddle = newIsland["size"] * 25;
-                        newBridge = {
-                            "startX": struct['x'] + anchorMiddle,
-                            "startY": struct['y'] + anchorMiddle,
-                            "endX": newIsland['x'] + buildMiddle,
-                            "endY": newIsland['y'] + buildMiddle,
-                            "style": "wood"
+                    }else if(buildSelection == "residencial"){
+                        newIsland = {
+                            "size": 7,
+                            "type": "residencial_island",
+                            "x": clickX,
+                            "y": clickY
+                        }
+                        newData = {
+                            "residents":(gameData[1]||0)+1
+                        }
+                    }else if(buildSelection == "comercial"){
+                        newIsland = {
+                            "size": 9,
+                            "type": "comercial_island",
+                            "x": clickX,
+                            "y": clickY
+                        }
+                        newData = {
+                            "production":(gameData[2]||0)+1
                         }
                     }
-                    firebase.database().ref("catislands/saves/" + gameID + "/structures/").push(newIsland);
-                    firebase.database().ref("catislands/saves/" + gameID + "/bridges/").push(newBridge);
+                    //bridge
+                    anchorMiddle = struct['size'] * 25;
+                    buildMiddle = newIsland["size"] * 25;
+                    newBridge = {
+                        "startX": struct['x'] + anchorMiddle,
+                        "startY": struct['y'] + anchorMiddle,
+                        "endX": newIsland['x'] + buildMiddle,
+                        "endY": newIsland['y'] + buildMiddle,
+                        "style": "wood"
+                    }
+                    //place
+                    if (!overlap(newIsland['x'], newIsland['y'], struct['x'], struct['y'], newIsland['size']*50, struct['size']*50)) {
+                        firebase.database().ref("catislands/saves/" + gameID + "/data/").update(newData);
+                        firebase.database().ref("catislands/saves/" + gameID + "/structures/").push(newIsland);
+                        firebase.database().ref("catislands/saves/" + gameID + "/bridges/").push(newBridge);
+                    } else {
+                        document.getElementById("selectionName").innerHTML = "Overllaping Structures";
+                    }
                 }
             })
         } else {
@@ -134,9 +181,8 @@ function mouseClicked() {
                         openStructure(struct);
                     } else if (gameMode == "build") {
                         buildMenu(struct['id']);
-                    }else{
-                        document.getElementById("selectionName").innerHTML = struct['type'];
                     }
+                    document.getElementById("selectionName").innerHTML = struct['type'];
                 }
             });
         }
@@ -162,6 +208,12 @@ function setBuild(n) {
     closeUi();
     if (n == 1) {
         buildSelection = "small";
+        gameMode = "place";
+    } else if (n == 2) {
+        buildSelection = "residencial";
+        gameMode = "place";
+    } else if (n == 3) {
+        buildSelection = "comercial";
         gameMode = "place";
     } else {
         buildSelection = "";

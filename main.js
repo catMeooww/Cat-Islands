@@ -57,7 +57,7 @@ function redirect(to){
   }else if(to == 3){
     window.location = "https://catmeooww.github.io/CatMeooww-GamingArea/";
   }else{
-    window.location = "../";
+    window.location = "./";
   }
 }
 
@@ -68,7 +68,9 @@ function openGame(id){
 function createGame(){
   saveName = document.getElementById("gamename").value;
   game = firebase.database().ref("catislands/saves/").push({
-    name: saveName,
+    data: {
+      "name": saveName
+    },
     structures: {
       "spawn":{'size':5,'type':'spawn','x':0,'y':0}
     }
@@ -77,4 +79,5 @@ function createGame(){
   firebase.database().ref("catislands/users/" + user + "/saves/"+saveID).update({
     name: saveName
   });
+  document.getElementById("newgame").style.visibility = "hidden";
 }

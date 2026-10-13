@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cat Islands</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="./assets/IslandIcon.png" type="image/png">
     <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-database.js"></script>
     <script src="p5.min.js"></script>
@@ -28,6 +29,8 @@
         <hr>
         <div id="builds">
             <button onclick="setBuild(1)"><img src="assets/IslandIcon.png"></button>
+            <button onclick="setBuild(2)"><img src="assets/ResidentialIsland_Icon.png"></button>
+            <button onclick="setBuild(3)"><img src="assets/ComercialIsland_Icon.png"></button>
         </div>
     </div>
     <div id="pause" class="ui">
@@ -40,7 +43,10 @@
         <button onclick="pauseGame()">Pause</button>
         <button onclick="centerCamera()">Center</button>
         <button onclick="toUser()" class="user"></button>
-        <p id="selectionName"></p>
+        <br>
+        <p class="dataShow" id="selectionName">Cat Islands</p>
+        <p class="dataShow" id="residentsStatus"></p>
+        <p class="dataShow" id="productionStatus"></p>
     </div>
     <div id="canvas-holder"></div>
     <div id="bar" class="menu">

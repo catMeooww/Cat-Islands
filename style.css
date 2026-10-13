@@ -126,7 +126,8 @@ button {
     background-color: green;
 }
 
-#selectionName{
+.dataShow{
+    display: inline-block;
     margin: 0px;
     width: 100px;
     text-align: center;
