@@ -41,8 +41,8 @@ async function loadGameData() {
 }
 
 function preload() {
-    islandBase = loadImage("/assets/Island.png");
-    addIcon = loadImage("/assets/addIcon.png");
+    islandBase = loadImage("./assets/Island.png");
+    addIcon = loadImage("./assets/addIcon.png");
 }
 
 function setup() {
